@@ -5,190 +5,302 @@
   <style>
     :root {
       --primary-color: #4361ee;
+      --primary-hover: #3251d4;
       --success-color: #2ec4b6;
       --warning-color: #ff9f1c;
       --danger-color: #e71d36;
+      --border-radius: 8px;
+      --transition-speed: 0.3s;
     }
 
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       margin: 0;
-      padding: 2rem;
-      background: linear-gradient(135deg, #f6f8ff 0%, #ffffff 100%);
+      padding: 1rem;
+      background: #ffffff;
       color: #1a1f36;
       line-height: 1.6;
+      max-height: 500px;
+      overflow-y: auto;
     }
 
-    .header {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      margin-bottom: 2rem;
+    .popup-header {
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .popup-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      background: #f8faff;
+      border-radius: var(--border-radius);
     }
 
     .platform-select {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      margin-bottom: 1.5rem;
+      margin: 0;
+      flex: 1;
     }
 
-    select {
-      width: 100%;
-      padding: 0.8rem;
-      border: 2px solid #e0e6ff;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.2s ease;
-    }
-
-    select:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-    }
-
-    .table-container {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      overflow: hidden;
-    }
-
-    table {
-      border-collapse: separate;
-      border-spacing: 0;
-    }
-
-    th {
-      background: #f8faff;
-      padding: 1rem;
-      font-weight: 600;
-      color: #1a1f36;
-    }
-
-    td {
-      padding: 1rem;
-      border-top: 1px solid #e0e6ff;
-    }
-
-    tr:hover td {
-      background: #f8faff;
-    }
-
-    .checkbox-wrapper {
+    .select-all-container {
       display: flex;
       align-items: center;
-      gap: 0.8rem;
+      gap: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      background: white;
+      border: 1px solid #e0e6ff;
+      border-radius: var(--border-radius);
+      transition: all var(--transition-speed);
+      font-size: 1.1rem;
+      font-weight: bold;
     }
 
-    input[type="checkbox"] {
-      width: 1.2rem;
-      height: 1.2rem;
-      border: 2px solid #e0e6ff;
-      border-radius: 4px;
+    .select-all-container:hover {
+      border-color: var(--primary-color);
+      background: #f8faff;
+    }
+
+    .select-all-container input[type="checkbox"] {
+      margin: 0;
+    }
+
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+      max-height: 360px;
+      overflow-y: auto;
+      padding: 0.5rem;
+    }
+
+    .agent-card {
+      background: #f8faff;
+      padding: 0.75rem;
+      border-radius: var(--border-radius);
+      border: 1px solid #e0e6ff;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: transform var(--transition-speed), box-shadow var(--transition-speed);
       cursor: pointer;
     }
 
-    .button-container {
-      display: flex;
-      gap: 1rem;
-      margin-top: 2rem;
+    .agent-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.15);
     }
 
-    .submit-btn, .cancel-btn {
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
+    .agent-card:active {
+      transform: translateY(0);
+    }
+
+    .agent-card label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: bold;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .status-select {
+      width: 100%;
+      margin-top: 0.25rem;
+      padding: 0.25rem;
+      border: 1px solid #e0e6ff;
+      border-radius: 4px;
+      transition: border-color var(--transition-speed);
+    }
+
+    .status-select:hover {
+      border-color: var(--primary-color);
+    }
+
+    .status-select option[value="✔"] {
+      color: var(--success-color);
+    }
+
+    .status-select option[value="✘"] {
+      color: var(--danger-color);
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      border: none;
+      cursor: pointer;
       font-weight: 500;
-      transition: all 0.2s ease;
+      transition: all var(--transition-speed) ease;
     }
 
     .submit-btn {
       background: var(--primary-color);
       color: white;
-      border: none;
+      box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
     }
 
     .submit-btn:hover {
-      background: var(--secondary-color);
+      background: var(--primary-hover);
+      box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
       transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
     }
 
     .cancel-btn {
       background: #f8faff;
-      border: 2px solid #e0e6ff;
+      border: 1px solid #e0e6ff;
       color: #1a1f36;
     }
 
     .cancel-btn:hover {
-      background: #e0e6ff;
+      background: #e6ebff;
+      border-color: #d1d9ff;
     }
 
     #loadingSpinner {
-      background: rgba(255, 255, 255, 0.9);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.95);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
       backdrop-filter: blur(4px);
     }
 
     .spinner {
       width: 40px;
       height: 40px;
-      border: 4px solid #e0e6ff;
+      border: 4px solid #f3f3f3;
       border-top: 4px solid var(--primary-color);
       border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #errorMessage {
+      display: none;
+      background: #ffebe9;
+      border: 1px solid var(--danger-color);
+      color: var(--danger-color);
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+    }
+
+    #blankFillMode {
+      background: #fff8c5;
+      border: 1px solid #f6e05e;
+      color: #735c0f;
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
+    }
+
+    .popup-footer {
+      padding: 0.75rem 1rem;
+      position: sticky;
+      bottom: 0;
+      background: white;
+      border-top: 1px solid #e0e6ff;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      z-index: 100;
+    }
+
+    /* Fluid responsive adjustments */
+    @media (min-width: 768px) {
+      .agent-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .agent-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    /* Platform select styling */
+    .platform-select select {
+      padding: 0.5rem;
+      border: 1px solid #e0e6ff;
+      border-radius: var(--border-radius);
+      background: white;
+      transition: all var(--transition-speed);
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .platform-select select:hover {
+      border-color: var(--primary-color);
+    }
+
+    /* Checkbox custom styling */
+    input[type="checkbox"] {
+      accent-color: var(--primary-color);
+      transition: all var(--transition-speed);
+    }
+
+    input[type="checkbox"]:hover {
+      transform: scale(1.1);
     }
   </style>
 </head>
 <body>
-  <div class="header">
+  <div class="popup-header">
     <h2>Agent Assignment Panel</h2>
-    <div class="user-info">
-      <div>User: MananPP</div>
-      <div class="timestamp" id="currentTime">2025-01-28 13:14:13</div>
-    </div>
+    <div class="timestamp" id="currentTime"></div>
   </div>
 
-<div id="blankFillMode" style="display: none; margin-bottom: 16px; padding: 12px; background-color: #fff8c5; border: 1px solid #f6e05e; border-radius: 6px; color: #735c0f;">
-  <div style="font-weight: 600; margin-bottom: 4px;">Blank Agent Fill Mode</div>
-  <div>Found <span id="blankRowsCount" style="font-weight: 600">0</span> blank assignments</div>
-</div>
-
-  <div id="errorMessage" class="error-message"></div>
-
-  <form id="agentForm">
-    <div class="platform-select">
-      <label for="platformSelect">Select Platform:</label>
-      <select id="platformSelect" onchange="handlePlatformChange()">
-        <option value="zomato">Zomato</option>
-        <option value="swiggy">Swiggy</option>
-      </select>
+  <div class="popup-content">
+    <div id="errorMessage"></div>
+    <div id="blankFillMode" style="display: none">
+      <strong>Blank Fill Mode</strong>
+      <div>Found <span id="blankRowsCount">0</span> blank assignments</div>
     </div>
 
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>
-              <div class="checkbox-wrapper">
-                <input type="checkbox" id="selectAll" onchange="handleSelectAll()">
-                <label for="selectAll">Select All</label>
-              </div>
-            </th>
-            <th>Agent Name</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="agentTableBody"></tbody>
-      </table>
+    <div class="controls-row">
+      <div class="platform-select">
+        <select id="platformSelect" onchange="handlePlatformChange()">
+          <option value="zomato">Zomato</option>
+          <option value="swiggy">Swiggy</option>
+        </select>
+      </div>
+      <div class="select-all-container">
+        <input type="checkbox" id="selectAll" onchange="handleSelectAll()">
+        <label for="selectAll">Select All</label>
+      </div>
     </div>
 
-    <div class="button-container">
-      <button type="button" class="cancel-btn" onclick="handleCancel()">Cancel</button>
-      <button type="button" class="submit-btn" onclick="handleSubmit()">Assign Agents</button>
-      <button type="button" class="submit-btn" id="submitButton" onclick="handleSubmit()">Blank Assign</button>
-    </div>
+    <div class="agent-grid" id="agentGrid"></div>
+  </div>
 
-  </form>
+  <div class="popup-footer">
+    <button type="button" class="cancel-btn" onclick="handleCancel()">Cancel</button>
+    <button type="button" class="submit-btn" onclick="handleSubmit()" id="submitButton">Assign Agents</button>
+  </div>
 
   <div id="loadingSpinner">
     <div class="spinner"></div>
@@ -224,60 +336,68 @@
       document.getElementById('currentTime').textContent = CONFIG.USER_INFO.lastUpdated;
     }
 
+    // Update the renderAgentTable function for grid layout
     function renderAgentTable() {
-      const tbody = document.getElementById('agentTableBody');
-      tbody.innerHTML = '';
+      const grid = document.getElementById('agentGrid');
+      grid.innerHTML = '';
 
       CONFIG.AGENTS.forEach(agent => {
-        const row = createAgentRow(agent);
-        tbody.appendChild(row);
+        const card = document.createElement('div');
+        card.className = 'agent-card';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'agent';
+        checkbox.value = agent;
+        checkbox.id = `agent-${agent}`;
+        checkbox.onchange = handleAgentSelection;
+
+        const label = document.createElement('label');
+        label.htmlFor = `agent-${agent}`;
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(agent));
+
+        const statusSelect = document.createElement('select');
+        statusSelect.className = 'status-select';
+        statusSelect.name = 'status';
+        statusSelect.innerHTML = `
+          <option value="✔">Present ✔</option>
+          <option value="✘">Absent ✘</option>
+        `;
+        statusSelect.onchange = handleStatusChange;
+
+        card.appendChild(label);
+        card.appendChild(statusSelect);
+        grid.appendChild(card);
       });
     }
 
-    function createAgentRow(agent) {
-      const row = document.createElement('tr');
-      
-      // Checkbox cell
-      const checkboxCell = document.createElement('td');
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.name = 'agent';
-      checkbox.value = agent;
-      checkbox.onchange = handleAgentSelection;
-      checkboxCell.appendChild(checkbox);
-
-      // Name cell
-      const nameCell = document.createElement('td');
-      nameCell.textContent = agent;
-
-      // Status cell
-      const statusCell = document.createElement('td');
-      const statusSelect = document.createElement('select');
-      statusSelect.name = 'status';
-      statusSelect.innerHTML = `
-        <option value="✔">Present ✔</option>
-        <option value="✘">Absent ✘</option>
-      `;
-      statusSelect.onchange = handleStatusChange;
-      statusCell.appendChild(statusSelect);
-
-      row.appendChild(checkboxCell);
-      row.appendChild(nameCell);
-      row.appendChild(statusCell);
-      
-      return row;
-    }
-
+    // Modified handleSelectAll function
     function handleSelectAll() {
       const selectAllCheckbox = document.getElementById('selectAll');
-      const checkboxes = document.getElementsByName('agent');
+      const checkboxes = document.querySelectorAll('input[name="agent"]');
+      const isChecked = selectAllCheckbox.checked;
+      
       checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAllCheckbox.checked;
+        checkbox.checked = isChecked;
+        // Update the status select if needed
+        const card = checkbox.closest('.agent-card');
+        const statusSelect = card.querySelector('.status-select');
+        if (statusSelect) {
+          statusSelect.value = isChecked ? '✔' : statusSelect.value;
+        }
       });
+      
       saveSelections();
     }
 
-    function handleAgentSelection() {
+    // Modified handleAgentSelection function
+    function handleAgentSelection(event) {
+      const selectAllCheckbox = document.getElementById('selectAll');
+      const checkboxes = document.querySelectorAll('input[name="agent"]');
+      const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+      selectAllCheckbox.checked = allChecked;
+      
       saveSelections();
     }
 

@@ -334,12 +334,12 @@ function scanBlankAgents(platform) {
   }
 }
 
-function showAgentSelectionSidebar(type = 'normal') {
-  const title = type === 'blank' ? 'Select Available Agents for Blank Assignments' : 'Select Available Agents';
+function showAgentSelectionSidebar(platform = 'zomato', isBlankFill = false) {
   const htmlOutput = HtmlService.createHtmlOutputFromFile('AgentSelection')
-    .setTitle(title)
-    .setWidth(300);
-  SpreadsheetApp.getUi().showSidebar(htmlOutput);
+    .setWidth(600)
+    .setHeight(500)
+    .setTitle('Agent Assignment Panel');
+  SpreadsheetApp.getUi().showModalDialog(htmlOutput, 'Agent Assignment Panel');
 }
 
 function updateSidebarData() {
