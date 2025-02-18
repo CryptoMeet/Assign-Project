@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 Assignment Dashboard</title>
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3f37c9;
+      --success-color: #2ec4b6;
+      --warning-color: #ff9f1c;
+      --danger-color: #e71d36;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f6f8ff 0%, #ffffff 100%);
+      color: var(--dark-color);
+      line-height: 1.6;
+    }
+
+    .platform-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: none;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .platform-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .platform-card.zomato {
+      border-left: 5px solid #e23744;
+    }
+
+    .platform-card.swiggy {
+      border-left: 5px solid #fc8019;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .stat-item {
+      background: var(--light-color);
+      padding: 0.8rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .refresh-button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .refresh-button:hover {
+      background: var(--secondary-color);
+      transform: translateY(-1px);
+    }
+
+    .refresh-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    table {
+      width: 100%;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      margin-top: 1.5rem;
+    }
+
+    th {
+      background: var(--primary-color);
+      color: white;
+      padding: 1rem;
+      font-weight: 500;
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #f8f9ff;
+    }
+
+    .filter-container {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      margin: 1.5rem 0;
+    }
+
+    select {
+      padding: 0.5rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    select:focus {
+      border-color: var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 Assignment Dashboard</h1>
+  <p>User: <?= data.currentUser || 'Unknown User' ?></p>
+  <p>Loading...</p>
+  <p id="timestamp">2025-01-28 13:14:13</p>
+
+  <button class="refresh-button" onclick="refreshData()">🔄 Refresh Data</button>
+
+  <h2>📊 Platform Summary</h2>
+
+  <!-- Zomato Card -->
+  <div class="platform-card zomato">
+    <h3>🟠 ZOMATO</h3>
+    <div class="stats">
+      Total: <?= data.platforms.zomato.total || 0 ?><br>
+      Main: <?= data.platforms.zomato.main || 0 ?><br>
+      Virtual: <?= data.platforms.zomato.virtual || 0 ?>
+    </div>
+    <div class="virtual-counts">
+      Virtual Breakdown:
+      <? const zomatoCounts = Object.entries(data.platforms.zomato.virtualCounts || {}).sort(([a], [b]) => parseInt(a) - parseInt(b)); ?>
+      <? zomatoCounts.forEach(([count, total]) => { ?>
+        <? if (total > 0) { ?>
+          Count <?= count ?>: <?= total ?><br>
+        <? } ?>
+      <? }); ?>
+    </div>
+  </div>
+
+  <!-- Swiggy Card -->
+  <div class="platform-card swiggy">
+    <h3>🟧 SWIGGY</h3>
+    <div class="stats">
+      Total: <?= data.platforms.swiggy.total || 0 ?><br>
+      Main: <?= data.platforms.swiggy.main || 0 ?><br>
+      Virtual: <?= data.platforms.swiggy.virtual || 0 ?>
+    </div>
+    <div class="virtual-counts">
+      Virtual Breakdown:
+      <? const swiggyCounts = Object.entries(data.platforms.swiggy.virtualCounts || {}).sort(([a], [b]) => parseInt(a) - parseInt(b)); ?>
+      <? swiggyCounts.forEach(([count, total]) => { ?>
+        <? if (total > 0) { ?>
+          Count <?= count ?>: <?= total ?><br>
+        <? } ?>
+      <? }); ?>
+    </div>
+  </div>
+
+  <h2>📈 Load Distribution</h2>
+  <p>(Load distribution details can be added here)</p>
+
+  <h2>📋 Detailed Assignment Matrix</h2>
+
+  <div class="filter-container">
+    <label for="platformFilter">Filter by Platform:</label>
+    <select id="platformFilter">
+      <option value="all">All</option>
+      <option value="zomato">Zomato</option>
+      <option value="swiggy">Swiggy</option>
+    </select>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Agent Name</th>
+        <th>Main</th>
+        <th>Virtual</th>
+        <th>Grand Total</th>
+      </tr>
+    </thead>
+    <tbody id="agentTableBody">
+      <? if (data.agentDistribution && data.agentDistribution.length > 0) { ?>
+        <? data.agentDistribution.forEach(agent => { ?>
+          <tr>
+            <td><?= agent.agent ?></td>
+            <td><?= agent.main ?></td>
+            <td><?= agent.virtual ?></td>
+            <td><?= agent.grandTotal ?></td>
+          </tr>
+        <? }); ?>
+      <? } else { ?>
+        <tr>
+          <td colspan="4">No agent data available</td>
+        </tr>
+      <? } ?>
+    </tbody>
+  </table>
+
+  <script>
+    // Function to refresh data
+    function refreshData() {
+      const refreshButton = document.querySelector('.refresh-button');
+      refreshButton.disabled = true;
+      refreshButton.innerHTML = '🔄 Refreshing...';
+
+      google.script.run
+        .withSuccessHandler(function(newData) {
+          console.log("Data received:", newData); // Debugging log
+          if (!newData || !newData.agentDistribution) {
+            console.error("Agent data is missing or undefined.");
+          } else {
+            updateDashboardCounts(newData);
+          }
+          refreshButton.disabled = false;
+          refreshButton.innerHTML = '🔄 Refresh Data';
+        })
+        .withFailureHandler(function(error) {
+          console.error('Refresh failed:', error);
+          refreshButton.disabled = false;
+          refreshButton.innerHTML = '🔄 Refresh Data';
+        })
+        .getDashboardData();
+    }
+
+    // Function to update dashboard counts dynamically
+    function updateDashboardCounts(data) {
+      // Update timestamp
+      document.getElementById('timestamp').innerText = new Date().toISOString();
+
+      // Update Zomato stats
+      document.querySelector('.platform-card.zomato .stats').innerHTML = `
+        Total: ${data.platforms.zomato.total || 0}<br>
+        Main: ${data.platforms.zomato.main || 0}<br>
+        Virtual: ${data.platforms.zomato.virtual || 0}
+      `;
+      const zomatoVirtualCounts = document.querySelector('.platform-card.zomato .virtual-counts');
+      zomatoVirtualCounts.innerHTML = 'Virtual Breakdown:<br>';
+      Object.entries(data.platforms.zomato.virtualCounts || {})
+        .sort(([a], [b]) => parseInt(a) - parseInt(b))
+        .forEach(([count, total]) => {
+          if (total > 0) {
+            zomatoVirtualCounts.innerHTML += `Count ${count}: ${total}<br>`;
+          }
+        });
+
+      // Update Swiggy stats
+      document.querySelector('.platform-card.swiggy .stats').innerHTML = `
+        Total: ${data.platforms.swiggy.total || 0}<br>
+        Main: ${data.platforms.swiggy.main || 0}<br>
+        Virtual: ${data.platforms.swiggy.virtual || 0}
+      `;
+      const swiggyVirtualCounts = document.querySelector('.platform-card.swiggy .virtual-counts');
+      swiggyVirtualCounts.innerHTML = 'Virtual Breakdown:<br>';
+      Object.entries(data.platforms.swiggy.virtualCounts || {})
+        .sort(([a], [b]) => parseInt(a) - parseInt(b))
+        .forEach(([count, total]) => {
+          if (total > 0) {
+            swiggyVirtualCounts.innerHTML += `Count ${count}: ${total}<br>`;
+          }
+        });
+
+      // Update agent table
+      const tbody = document.getElementById('agentTableBody');
+      tbody.innerHTML = '';
+      if (data.agentDistribution && data.agentDistribution.length > 0) {
+        data.agentDistribution.forEach(agent => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${agent.agent}</td>
+            <td>${agent.main}</td>
+            <td>${agent.virtual}</td>
+            <td>${agent.grandTotal}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } else {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td colspan="4">No agent data available</td>';
+        tbody.appendChild(row);
+      }
+    }
+
+    // Initial update
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    function updateDateTime() {
+      document.getElementById('timestamp').innerText = new Date().toISOString();
+    }
+  </script>
+</body>
+</html>

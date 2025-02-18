@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --success-color: #2ec4b6;
+      --warning-color: #ff9f1c;
+      --danger-color: #e71d36;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f6f8ff 0%, #ffffff 100%);
+      color: #1a1f36;
+      line-height: 1.6;
+    }
+
+    .header {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      margin-bottom: 2rem;
+    }
+
+    .platform-select {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      margin-bottom: 1.5rem;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.8rem;
+      border: 2px solid #e0e6ff;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    th {
+      background: #f8faff;
+      padding: 1rem;
+      font-weight: 600;
+      color: #1a1f36;
+    }
+
+    td {
+      padding: 1rem;
+      border-top: 1px solid #e0e6ff;
+    }
+
+    tr:hover td {
+      background: #f8faff;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    input[type="checkbox"] {
+      width: 1.2rem;
+      height: 1.2rem;
+      border: 2px solid #e0e6ff;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .submit-btn, .cancel-btn {
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .submit-btn {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+    }
+
+    .submit-btn:hover {
+      background: var(--secondary-color);
+      transform: translateY(-1px);
+    }
+
+    .cancel-btn {
+      background: #f8faff;
+      border: 2px solid #e0e6ff;
+      color: #1a1f36;
+    }
+
+    .cancel-btn:hover {
+      background: #e0e6ff;
+    }
+
+    #loadingSpinner {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(4px);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e0e6ff;
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Agent Assignment Panel</h2>
+    <div class="user-info">
+      <div>User: MananPP</div>
+      <div class="timestamp" id="currentTime">2025-01-28 13:14:13</div>
+    </div>
+  </div>
+
+<div id="blankFillMode" style="display: none; margin-bottom: 16px; padding: 12px; background-color: #fff8c5; border: 1px solid #f6e05e; border-radius: 6px; color: #735c0f;">
+  <div style="font-weight: 600; margin-bottom: 4px;">Blank Agent Fill Mode</div>
+  <div>Found <span id="blankRowsCount" style="font-weight: 600">0</span> blank assignments</div>
+</div>
+
+  <div id="errorMessage" class="error-message"></div>
+
+  <form id="agentForm">
+    <div class="platform-select">
+      <label for="platformSelect">Select Platform:</label>
+      <select id="platformSelect" onchange="handlePlatformChange()">
+        <option value="zomato">Zomato</option>
+        <option value="swiggy">Swiggy</option>
+      </select>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="selectAll" onchange="handleSelectAll()">
+                <label for="selectAll">Select All</label>
+              </div>
+            </th>
+            <th>Agent Name</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="agentTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="button-container">
+      <button type="button" class="cancel-btn" onclick="handleCancel()">Cancel</button>
+      <button type="button" class="submit-btn" onclick="handleSubmit()">Assign Agents</button>
+      <button type="button" class="submit-btn" id="submitButton" onclick="handleSubmit()">Blank Assign</button>
+    </div>
+
+  </form>
+
+  <div id="loadingSpinner">
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    // Configuration
+  const CONFIG = {
+  USER_INFO: {
+    name: "MananPP",
+    lastUpdated: "2025-01-30 07:01:58"  // Updated to current timestamp
+  },
+  AGENTS: ["Komal", "Prithvi", "Dhruvi", "Mohit", "Kaushik", "Shibani", "Saahil", "Nirali"],
+  BLANK_FILL: {
+    active: false,
+    rows: [],
+    platform: ''
+  }
+};
+
+    let selectedAgents = [];
+    let currentPlatform = 'zomato';
+    const DEBOUNCE_DELAY = 300;
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      renderAgentTable();
+      initializeTimestamp();
+      checkBlankFillMode();
+    });
+
+    function initializeTimestamp() {
+      document.getElementById('currentTime').textContent = CONFIG.USER_INFO.lastUpdated;
+    }
+
+    function renderAgentTable() {
+      const tbody = document.getElementById('agentTableBody');
+      tbody.innerHTML = '';
+
+      CONFIG.AGENTS.forEach(agent => {
+        const row = createAgentRow(agent);
+        tbody.appendChild(row);
+      });
+    }
+
+    function createAgentRow(agent) {
+      const row = document.createElement('tr');
+      
+      // Checkbox cell
+      const checkboxCell = document.createElement('td');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.name = 'agent';
+      checkbox.value = agent;
+      checkbox.onchange = handleAgentSelection;
+      checkboxCell.appendChild(checkbox);
+
+      // Name cell
+      const nameCell = document.createElement('td');
+      nameCell.textContent = agent;
+
+      // Status cell
+      const statusCell = document.createElement('td');
+      const statusSelect = document.createElement('select');
+      statusSelect.name = 'status';
+      statusSelect.innerHTML = `
+        <option value="✔">Present ✔</option>
+        <option value="✘">Absent ✘</option>
+      `;
+      statusSelect.onchange = handleStatusChange;
+      statusCell.appendChild(statusSelect);
+
+      row.appendChild(checkboxCell);
+      row.appendChild(nameCell);
+      row.appendChild(statusCell);
+      
+      return row;
+    }
+
+    function handleSelectAll() {
+      const selectAllCheckbox = document.getElementById('selectAll');
+      const checkboxes = document.getElementsByName('agent');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+      });
+      saveSelections();
+    }
+
+    function handleAgentSelection() {
+      saveSelections();
+    }
+
+    function handleStatusChange() {
+      saveSelections();
+    }
+
+    function handlePlatformChange() {
+      currentPlatform = document.getElementById('platformSelect').value;
+      saveSelections();
+    }
+
+    function saveSelections() {
+      showLoading();
+      setTimeout(() => {
+        try {
+          const checkboxes = Array.from(document.getElementsByName('agent'));
+          const statuses = Array.from(document.getElementsByName('status'));
+
+          selectedAgents = checkboxes
+            .filter(checkbox => checkbox.checked)
+            .map((checkbox, index) => ({
+              name: checkbox.value,
+              status: statuses[CONFIG.AGENTS.indexOf(checkbox.value)].value
+            }));
+
+          hideLoading();
+        } catch (error) {
+          console.error("Error in saveSelections:", error);
+          showError("Error saving selections: " + error.message);
+          hideLoading();
+        }
+      }, DEBOUNCE_DELAY);
+    }
+
+    function handleSubmit() {
+      if (selectedAgents.length === 0) {
+        showError("Please select at least one agent");
+        return;
+      }
+
+      const presentAgents = selectedAgents.filter(agent => agent.status === '✔');
+      if (presentAgents.length === 0) {
+        showError("Please select at least one present agent");
+        return;
+      }
+
+      showLoading();
+  if (CONFIG.BLANK_FILL.active) {
+    // Handle blank fill mode
+    google.script.run
+      .withSuccessHandler(onSuccess)
+      .withFailureHandler(onFailure)
+      .fillBlankAgents(
+        CONFIG.BLANK_FILL.platform,
+        JSON.stringify(selectedAgents),
+        JSON.stringify(CONFIG.BLANK_FILL.rows)
+      );
+  } else {
+    // Handle regular assignment
+    google.script.run
+      .withSuccessHandler(onSuccess)
+      .withFailureHandler(onFailure)
+      .assignAgents(currentPlatform, JSON.stringify(selectedAgents));
+  }
+    }
+
+    function handleCancel() {
+      google.script.host.close();
+    }
+
+function checkBlankFillMode() {
+  google.script.run
+    .withSuccessHandler(setupBlankFillMode)
+    .withFailureHandler(showError)
+    .getBlankScanResults();
+}
+
+function setupBlankFillMode(results) {
+  if (results) {
+    CONFIG.BLANK_FILL.active = true;
+    CONFIG.BLANK_FILL.rows = results.blankRows;
+    CONFIG.BLANK_FILL.platform = results.platform;
+
+    // Show blank fill mode UI
+    document.getElementById('blankFillMode').style.display = 'block';
+    document.getElementById('blankRowsCount').textContent = results.blankRows.length;
+    document.getElementById('submitButton').textContent = 'Fill Blank Cells';
+    
+    // Set platform
+    document.getElementById('platformSelect').value = results.platform.toLowerCase();
+    document.getElementById('platformSelect').disabled = true;
+  }
+}
+
+
+    function onSuccess(result) {
+  hideLoading();
+  if (result && result.message) {
+    // Show success message if provided
+    const successDiv = document.createElement('div');
+    successDiv.style.cssText = `
+      background-color: #e6ffed;
+      border: 1px solid #34d058;
+      color: #165c26;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    `;
+    successDiv.textContent = result.message;
+    document.body.insertBefore(successDiv, document.querySelector('.platform-select'));
+    
+    setTimeout(() => {
+      google.script.host.close();
+    }, 2000);
+  } else {
+    google.script.host.close();
+  }
+}
+
+   function onFailure(error) {
+  hideLoading();
+  showError("Error: " + (error.message || error));
+}
+
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      setTimeout(() => {
+        errorDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    function showLoading() {
+      document.getElementById('loadingSpinner').style.display = 'flex';
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingSpinner').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
