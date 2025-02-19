@@ -850,25 +850,27 @@ function createTimeDrivenTrigger() {
 
 // Get Dashboard Data Function
 function getDashboardData() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const zomatoSheet = ss.getSheetByName(CONFIG.SHEETS.ZOMATO);
-  const swiggySheet = ss.getSheetByName(CONFIG.SHEETS.SWIGGY);
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const zomatoSheet = ss.getSheetByName(CONFIG.SHEETS.ZOMATO);
+    const swiggySheet = ss.getSheetByName(CONFIG.SHEETS.SWIGGY);
 
-  // Get agent distribution
-  const agentDistribution = getAgentDistribution();
+    const data = {
+      timestamp: new Date().toISOString(),
+      currentUser: Session.getActiveUser().getEmail(),
+      platforms: {
+        zomato: calculatePlatformMetrics(zomatoSheet, CONFIG.COLUMNS.ZOMATO),
+        swiggy: calculatePlatformMetrics(swiggySheet, CONFIG.COLUMNS.SWIGGY)
+      },
+      agentDistribution: getAgentDistribution()
+    };
 
-  // Log the agent distribution for debugging
-  console.log("Agent Distribution:", agentDistribution);
-
-  return {
-    timestamp: new Date().toISOString(),
-    currentUser: Session.getActiveUser().getEmail(),
-    platforms: {
-      zomato: calculatePlatformCounts(zomatoSheet, CONFIG.COLUMNS.ZOMATO),
-      swiggy: calculatePlatformCounts(swiggySheet, CONFIG.COLUMNS.SWIGGY)
-    },
-    agentDistribution: agentDistribution // Include agentDistribution in the returned data
-  };
+    logEvent('Dashboard', 'Dashboard data retrieved successfully');
+    return data;
+  } catch (e) {
+    logEvent('Error', `Failed to get dashboard data: ${e.message}`);
+    throw e;
+  }
 }
 
 // Calculate Platform Counts Function
@@ -1230,3 +1232,241 @@ function updateAgentTable(data) {
 //updateDateTime();
 // Update every second
 //setInterval(updateDateTime, 1000);
+
+// Additional functions needed for dashboard
+
+function getDashboardData() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const zomatoSheet = ss.getSheetByName(CONFIG.SHEETS.ZOMATO);
+    const swiggySheet = ss.getSheetByName(CONFIG.SHEETS.SWIGGY);
+
+    const data = {
+      timestamp: new Date().toISOString(),
+      currentUser: Session.getActiveUser().getEmail(),
+      platforms: {
+        zomato: calculatePlatformMetrics(zomatoSheet, CONFIG.COLUMNS.ZOMATO),
+        swiggy: calculatePlatformMetrics(swiggySheet, CONFIG.COLUMNS.SWIGGY)
+      },
+      agentDistribution: getAgentDistribution()
+    };
+
+    logEvent('Dashboard', 'Dashboard data retrieved successfully');
+    return data;
+  } catch (e) {
+    logEvent('Error', `Failed to get dashboard data: ${e.message}`);
+    throw e;
+  }
+}
+
+function calculatePlatformMetrics(sheet, columnConfig) {
+  if (!sheet) return { total: 0, main: 0, virtual: 0, virtualCounts: {} };
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { total: 0, main: 0, virtual: 0, virtualCounts: {} };
+
+  const data = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+  const typeColIndex = columnToIndex(columnConfig.TYPE);
+  const agentColIndex = columnToIndex(columnConfig.AGENT);
+  const countColIndex = 0; // Column A has count
+
+  let metrics = {
+    total: 0,
+    main: 0,
+    virtual: 0,
+    virtualCounts: {}
+  };
+
+  data.forEach(row => {
+    if (row[agentColIndex]) {
+      const count = parseInt(row[countColIndex]) || 0;
+      const type = (row[typeColIndex] || '').toString().toLowerCase();
+
+      if (count > 0) {
+        metrics.total++;
+        if (type === 'main') {
+          metrics.main++;
+        } else if (type === 'virtual') {
+          metrics.virtual++;
+          metrics.virtualCounts[count] = (metrics.virtualCounts[count] || 0) + 1;
+        }
+      }
+    }
+  });
+
+  return metrics;
+}
+
+function columnToIndex(column) {
+  return column.split('').reduce((acc, char) => 
+    acc * 26 + char.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0) + 1, 0) - 1;
+}
+
+function getAgentDistributionDetailed() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const zomatoSheet = ss.getSheetByName(CONFIG.SHEETS.ZOMATO);
+    const swiggySheet = ss.getSheetByName(CONFIG.SHEETS.SWIGGY);
+    
+    const agentStats = {};
+    
+    // Process Zomato data
+    if (zomatoSheet) {
+      processSheetForAgentStats(zomatoSheet, CONFIG.COLUMNS.ZOMATO, agentStats, 'zomato');
+    }
+    
+    // Process Swiggy data
+    if (swiggySheet) {
+      processSheetForAgentStats(swiggySheet, CONFIG.COLUMNS.SWIGGY, agentStats, 'swiggy');
+    }
+    
+    return Object.entries(agentStats).map(([agent, stats]) => ({
+      agent,
+      main: stats.main || 0,
+      virtual: stats.virtual || 0,
+      virtualBreakdown: stats.virtualBreakdown || {},
+      grandTotal: (stats.main || 0) + (stats.virtual || 0),
+      platformDistribution: stats.platformDistribution || { zomato: 0, swiggy: 0 }
+    }));
+  } catch (e) {
+    logEvent('Error', `Failed to get detailed agent distribution: ${e.message}`);
+    throw e;
+  }
+}
+
+function processSheetForAgentStats(sheet, columnConfig, agentStats, platform) {
+  const data = sheet.getDataRange().getValues();
+  const agentColIndex = columnToIndex(columnConfig.AGENT);
+  const typeColIndex = columnToIndex(columnConfig.TYPE);
+  const countColIndex = 0;
+
+  data.slice(1).forEach(row => {
+    const agent = row[agentColIndex]?.toString().trim();
+    if (!agent) return;
+
+    if (!agentStats[agent]) {
+      agentStats[agent] = {
+        main: 0,
+        virtual: 0,
+        virtualBreakdown: {},
+        platformDistribution: { zomato: 0, swiggy: 0 }
+      };
+    }
+
+    const count = parseInt(row[countColIndex]) || 0;
+    const type = row[typeColIndex]?.toString().trim().toLowerCase();
+
+    if (count > 0) {
+      agentStats[agent].platformDistribution[platform]++;
+      
+      if (type === 'main') {
+        agentStats[agent].main++;
+      } else if (type === 'virtual') {
+        agentStats[agent].virtual++;
+        agentStats[agent].virtualBreakdown[count] = 
+          (agentStats[agent].virtualBreakdown[count] || 0) + 1;
+      }
+    }
+  });
+}
+
+// Dashboard functions
+function showDashboard() {
+  const html = HtmlService.createHtmlOutputFromFile('Dashboard')
+      .setWidth(1200)
+      .setHeight(800)
+      .setTitle('📊 Assignment Dashboard');
+  SpreadsheetApp.getUi().showModalDialog(html, '📊 Assignment Dashboard');
+}
+
+function getDashboardData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const zomatoSheet = ss.getSheetByName(CONFIG.SHEETS.ZOMATO);
+  const swiggySheet = ss.getSheetByName(CONFIG.SHEETS.SWIGGY);
+
+  return {
+    timestamp: new Date().toISOString(),
+    currentUser: Session.getActiveUser().getEmail(),
+    platforms: {
+      zomato: calculatePlatformMetrics(zomatoSheet, CONFIG.COLUMNS.ZOMATO),
+      swiggy: calculatePlatformMetrics(swiggySheet, CONFIG.COLUMNS.SWIGGY)
+    },
+    agentDistribution: getAgentDistribution()
+  };
+}
+
+function calculatePlatformMetrics(sheet, columnConfig) {
+  if (!sheet) return { total: 0, main: 0, virtual: 0, virtualCounts: {} };
+
+  const data = sheet.getDataRange().getValues();
+  const typeColIndex = columnToIndex(columnConfig.TYPE);
+  const agentColIndex = columnToIndex(columnConfig.AGENT);
+
+  let metrics = {
+    total: 0,
+    main: 0,
+    virtual: 0,
+    virtualCounts: {}
+  };
+
+  data.slice(1).forEach(row => {
+    if (row[agentColIndex]) {
+      metrics.total++;
+      const type = (row[typeColIndex] || '').toString().toLowerCase();
+      
+      if (type === 'main') {
+        metrics.main++;
+      } else if (type === 'virtual') {
+        metrics.virtual++;
+        const count = row[0] || 1; // Count from column A
+        metrics.virtualCounts[count] = (metrics.virtualCounts[count] || 0) + 1;
+      }
+    }
+  });
+
+  return metrics;
+}
+
+function getAgentDistribution() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const zomatoSheet = ss.getSheetByName(CONFIG.SHEETS.ZOMATO);
+  const swiggySheet = ss.getSheetByName(CONFIG.SHEETS.SWIGGY);
+
+  const agentStats = {};
+
+  // Process both platforms
+  [
+    { sheet: zomatoSheet, config: CONFIG.COLUMNS.ZOMATO, platform: 'zomato' },
+    { sheet: swiggySheet, config: CONFIG.COLUMNS.SWIGGY, platform: 'swiggy' }
+  ].forEach(({ sheet, config, platform }) => {
+    if (!sheet) return;
+
+    const data = sheet.getDataRange().getValues();
+    const typeColIndex = columnToIndex(config.TYPE);
+    const agentColIndex = columnToIndex(config.AGENT);
+
+    data.slice(1).forEach(row => {
+      const agent = row[agentColIndex]?.toString().trim();
+      if (!agent) return;
+
+      if (!agentStats[agent]) {
+        agentStats[agent] = { main: 0, virtual: 0, grandTotal: 0 };
+      }
+
+      const type = (row[typeColIndex] || '').toString().toLowerCase();
+      if (type === 'main') {
+        agentStats[agent].main++;
+      } else if (type === 'virtual') {
+        agentStats[agent].virtual++;
+      }
+      agentStats[agent].grandTotal++;
+    });
+  });
+
+  return Object.entries(agentStats)
+    .map(([agent, stats]) => ({
+      agent,
+      ...stats
+    }))
+    .sort((a, b) => a.agent.localeCompare(b.agent));
+}

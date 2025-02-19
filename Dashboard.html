@@ -254,70 +254,153 @@
       padding: 4px;
       border-radius: 8px;
     }
+
+    .platform-summary {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .platform-card.zomato {
+      background: linear-gradient(135deg, #ffeef0 0%, #fff5f5 100%);
+      color: #333;
+    }
+
+    .platform-card.swiggy {
+      background: linear-gradient(135deg, #fff4e6 0%, #fff8f0 100%);
+      color: #333;
+    }
+
+    .platform-stats-table {
+      width: 100%;
+      margin-top: 1rem;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .platform-stats-table th,
+    .platform-stats-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .platform-stats-table th {
+      background: rgba(0, 0, 0, 0.05);
+      font-weight: 600;
+    }
+
+    .load-distribution {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin: 2rem 0;
+    }
+
+    .load-bar {
+      height: 24px;
+      background: #f0f0f0;
+      border-radius: 12px;
+      margin: 1rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .load-fill {
+      height: 100%;
+      transition: width 0.5s ease;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      color: white;
+      font-weight: 500;
+    }
+
+    .load-fill.zomato {
+      background: var(--zomato-color);
+    }
+
+    .load-fill.swiggy {
+      background: var(--swiggy-color);
+    }
   </style>
 </head>
 <body>
   <h1>Assignment Dashboard</h1>
-  <p>User: <?= data.currentUser || 'Unknown User' ?></p>
-  <p>Loading...</p>
-  <p id="timestamp">2025-01-28 13:14:13</p>
+  <p id="userDisplay"></p>
+  <p id="timestamp"></p>
 
   <button class="refresh-button" onclick="refreshData()">🔄 Refresh Data</button>
 
   <h2>📊 Platform Summary</h2>
+  <div class="platform-summary">
+    <!-- Zomato Card -->
+    <div class="platform-card zomato">
+      <div class="platform-header">
+        <img src="https://b.zmtcdn.com/web_assets/b40b97e677bc7b2ca77c58c61db266fe1603954218.png" alt="Zomato Logo" class="platform-logo">
+      </div>
+      <table class="platform-stats-table" id="zomatoStatsTable">
+        <tr>
+          <th>Metric</th>
+          <th>Count</th>
+        </tr>
+        <!-- Table rows will be populated by JavaScript -->
+      </table>
+      <div class="virtual-counts">
+        <h4>Virtual Breakdown:</h4>
+        <table class="platform-stats-table" id="zomatoVirtualTable">
+          <tr>
+            <th>Count Type</th>
+            <th>Total</th>
+          </tr>
+          <!-- Virtual counts will be populated by JavaScript -->
+        </table>
+      </div>
+    </div>
 
-  <!-- Zomato Card -->
-  <div class="platform-card zomato">
-    <div class="platform-header">
-      <img src="https://b.zmtcdn.com/web_assets/b40b97e677bc7b2ca77c58c61db266fe1603954218.png" alt="Zomato Logo" class="platform-logo">
-    </div>
-    <div class="stats">
-      Total: <?= data.platforms.zomato.total || 0 ?><br>
-      Main: <?= data.platforms.zomato.main || 0 ?><br>
-      Virtual: <?= data.platforms.zomato.virtual || 0 ?>
-    </div>
-    <div class="virtual-counts">
-      Virtual Breakdown:
-      <? const zomatoCounts = Object.entries(data.platforms.zomato.virtualCounts || {}).sort(([a], [b]) => parseInt(a) - parseInt(b)); ?>
-      <? zomatoCounts.forEach(([count, total]) => { ?>
-        <? if (total > 0) { ?>
-          Count <?= count ?>: <?= total ?><br>
-        <? } ?>
-      <? }); ?>
-    </div>
-  </div>
-
-  <!-- Swiggy Card -->
-  <div class="platform-card swiggy">
-    <div class="platform-header">
-      <img src="https://logos-world.net/wp-content/uploads/2020/11/Swiggy-Logo.png" alt="Swiggy Logo" class="platform-logo swiggy">
-      <h3>SWIGGY</h3>
-    </div>
-    <div class="stats">
-      Total: <?= data.platforms.swiggy.total || 0 ?><br>
-      Main: <?= data.platforms.swiggy.main || 0 ?><br>
-      Virtual: <?= data.platforms.swiggy.virtual || 0 ?>
-    </div>
-    <div class="virtual-counts">
-      Virtual Breakdown:
-      <? const swiggyCounts = Object.entries(data.platforms.swiggy.virtualCounts || {}).sort(([a], [b]) => parseInt(a) - parseInt(b)); ?>
-      <? swiggyCounts.forEach(([count, total]) => { ?>
-        <? if (total > 0) { ?>
-          Count <?= count ?>: <?= total ?><br>
-        <? } ?>
-      <? }); ?>
+    <!-- Swiggy Card -->
+    <div class="platform-card swiggy">
+      <div class="platform-header">
+        <img src="https://logos-world.net/wp-content/uploads/2020/11/Swiggy-Logo.png" alt="Swiggy Logo" class="platform-logo swiggy">
+        <h3>SWIGGY</h3>
+      </div>
+      <table class="platform-stats-table" id="swiggyStatsTable">
+        <tr>
+          <th>Metric</th>
+          <th>Count</th>
+        </tr>
+        <!-- Table rows will be populated by JavaScript -->
+      </table>
+      <div class="virtual-counts">
+        <h4>Virtual Breakdown:</h4>
+        <table class="platform-stats-table" id="swiggyVirtualTable">
+          <tr>
+            <th>Count Type</th>
+            <th>Total</th>
+          </tr>
+          <!-- Virtual counts will be populated by JavaScript -->
+        </table>
+      </div>
     </div>
   </div>
 
   <h2>📈 Load Distribution</h2>
-  <p>(Load distribution details can be added here)</p>
+  <div class="load-distribution" id="loadDistribution">
+    <!-- Load distribution will be populated by JavaScript -->
+  </div>
 
   <h2>📋 Detailed Assignment Matrix</h2>
 
   <div class="filter-container">
     <label for="platformFilter">Filter by Platform:</label>
-    <select id="platformFilter">
-      <option value="all">All</option>
+    <select id="platformFilter" onchange="filterTable()">
+      <option value="all">All Platforms</option>
       <option value="zomato">Zomato</option>
       <option value="swiggy">Swiggy</option>
     </select>
@@ -333,38 +416,279 @@
       </tr>
     </thead>
     <tbody id="agentTableBody">
-      <? if (data.agentDistribution && data.agentDistribution.length > 0) { ?>
-        <? data.agentDistribution.forEach(agent => { ?>
-          <tr>
-            <td><?= agent.agent ?></td>
-            <td><?= agent.main ?></td>
-            <td><?= agent.virtual ?></td>
-            <td><?= agent.grandTotal ?></td>
-          </tr>
-        <? }); ?>
-      <? } else { ?>
-        <tr>
-          <td colspan="4">No agent data available</td>
-        </tr>
-      <? } ?>
+      <!-- Dynamic content will be populated by JavaScript -->
     </tbody>
   </table>
 
   <script>
-    // Function to refresh data
+    // Global state
+    let dashboardData = null;
+
+    // Initialize dashboard
+    function initDashboard() {
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        refreshData();
+    }
+
+    // Update timestamp
+    function updateDateTime() {
+        const timestamp = document.getElementById('timestamp');
+        if (timestamp) {
+            timestamp.innerText = new Date().toISOString();
+        }
+    }
+
+    // Refresh dashboard data
+    function refreshData() {
+        const refreshButton = document.querySelector('.refresh-button');
+        if (refreshButton) {
+            refreshButton.disabled = true;
+            refreshButton.innerHTML = '🔄 Refreshing...';
+        }
+
+        google.script.run
+            .withSuccessHandler(handleRefreshSuccess)
+            .withFailureHandler(handleRefreshError)
+            .getDashboardData();
+    }
+
+    // Handle successful data refresh
+    function handleRefreshSuccess(newData) {
+        console.log("Data received:", newData);
+        if (!newData || !newData.agentDistribution) {
+            console.error("Invalid data received");
+            return;
+        }
+
+        dashboardData = newData;
+        updateDashboardUI();
+        enableRefreshButton();
+    }
+
+    // Handle refresh error
+    function handleRefreshError(error) {
+        console.error('Refresh failed:', error);
+        enableRefreshButton();
+    }
+
+    // Enable refresh button
+    function enableRefreshButton() {
+        const refreshButton = document.querySelector('.refresh-button');
+        if (refreshButton) {
+            refreshButton.disabled = false;
+            refreshButton.innerHTML = '🔄 Refresh Data';
+        }
+    }
+
+    // Update dashboard UI
+    function updateDashboardUI() {
+        if (!dashboardData) return;
+
+        updatePlatformStats('zomato');
+        updatePlatformStats('swiggy');
+        updateLoadDistribution();
+        updateAgentTable();
+    }
+
+    // Update platform statistics
+    function updatePlatformStats(platform) {
+        const platformData = dashboardData.platforms[platform];
+        if (!platformData) return;
+
+        const card = document.querySelector(`.platform-card.${platform}`);
+        if (!card) return;
+
+        // Update main stats
+        const statsTable = card.querySelector('.platform-stats-table tbody');
+        if (statsTable) {
+            statsTable.innerHTML = `
+                <tr>
+                    <td>Total Assignments</td>
+                    <td>${platformData.total || 0}</td>
+                </tr>
+                <tr>
+                    <td>Main Restaurants</td>
+                    <td>${platformData.main || 0}</td>
+                </tr>
+                <tr>
+                    <td>Virtual Kitchens</td>
+                    <td>${platformData.virtual || 0}</td>
+                </tr>
+            `;
+        }
+
+        // Update virtual breakdown
+        updateVirtualBreakdown(platform, platformData.virtualCounts);
+    }
+
+    // Update virtual breakdown table
+    function updateVirtualBreakdown(platform, virtualCounts) {
+        const breakdownTable = document.querySelector(`.platform-card.${platform} .virtual-counts table tbody`);
+        if (!breakdownTable || !virtualCounts) return;
+
+        const breakdownHtml = Object.entries(virtualCounts)
+            .sort(([a], [b]) => parseInt(a) - parseInt(b))
+            .map(([count, total]) => total > 0 ? `
+                <tr>
+                    <td>Count ${count}</td>
+                    <td>${total}</td>
+                </tr>
+            ` : '').join('');
+
+        breakdownTable.innerHTML = breakdownHtml;
+    }
+
+    // Update load distribution bars
+    function updateLoadDistribution() {
+        const { zomato, swiggy } = dashboardData.platforms;
+        const total = (zomato.total || 0) + (swiggy.total || 0);
+        
+        if (total === 0) return;
+
+        const zomatoPercent = Math.round((zomato.total / total) * 100);
+        const swiggyPercent = 100 - zomatoPercent;
+
+        updateLoadBar('zomato', zomatoPercent, zomato.total);
+        updateLoadBar('swiggy', swiggyPercent, swiggy.total);
+    }
+
+    // Update individual load bar
+    function updateLoadBar(platform, percent, total) {
+        const bar = document.querySelector(`.load-fill.${platform}`);
+        if (bar) {
+            bar.style.width = `${percent}%`;
+            bar.innerHTML = `${total} assignments`;
+        }
+    }
+
+    // Update agent table
+    function updateAgentTable() {
+        const tbody = document.getElementById('agentTableBody');
+        if (!tbody || !dashboardData.agentDistribution) return;
+
+        tbody.innerHTML = dashboardData.agentDistribution.length > 0 
+            ? dashboardData.agentDistribution.map(agent => `
+                <tr data-platform="${agent.platforms?.join(',') || 'all'}">
+                  <td>${agent.agent || ''}</td>
+                  <td>${agent.main || 0}</td>
+                  <td>${agent.virtual || 0}</td>
+                  <td>${agent.grandTotal || 0}</td>
+                </tr>
+            `).join('')
+            : '<tr><td colspan="4">No agent data available</td></tr>';
+
+        filterTable();
+    }
+
+    // Filter table based on platform selection
+    function filterTable() {
+        const platform = document.getElementById('platformFilter').value;
+        const rows = document.querySelectorAll('#agentTableBody tr');
+
+        rows.forEach(row => {
+            if (platform === 'all') {
+                row.style.display = '';
+                return;
+            }
+
+            const cells = row.getElementsByTagName('td');
+            if (cells.length === 0) return;
+            
+            const agentName = cells[0].textContent.trim().toLowerCase();
+            row.style.display = agentName.includes(platform) ? '' : 'none';
+        });
+    }
+
+    // Add event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        const filterSelect = document.getElementById('platformFilter');
+        if (filterSelect) {
+            filterSelect.addEventListener('change', filterTable);
+        }
+        initDashboard();
+    });
+
+    // Initialize dashboard data
+    function updateDashboardUI(data) {
+      // Update user and timestamp
+      document.getElementById('userDisplay').textContent = `User: ${data.currentUser || 'Unknown User'}`;
+      document.getElementById('timestamp').textContent = new Date().toISOString();
+
+      // Update Zomato stats
+      updatePlatformStats('zomato', data.platforms.zomato);
+      updatePlatformStats('swiggy', data.platforms.swiggy);
+
+      // Update load distribution
+      updateLoadDistribution(data.platforms);
+
+      // Update agent table
+      updateAgentTable(data.agentDistribution);
+    }
+
+    function updatePlatformStats(platform, data) {
+      const statsTable = document.getElementById(`${platform}StatsTable`);
+      const virtualTable = document.getElementById(`${platform}VirtualTable`);
+
+      // Update main stats
+      statsTable.innerHTML = `
+        <tr><th>Metric</th><th>Count</th></tr>
+        <tr><td>Total Assignments</td><td>${data.total || 0}</td></tr>
+        <tr><td>Main Restaurants</td><td>${data.main || 0}</td></tr>
+        <tr><td>Virtual Kitchens</td><td>${data.virtual || 0}</td></tr>
+      `;
+
+      // Update virtual breakdown
+      let virtualHTML = '<tr><th>Count Type</th><th>Total</th></tr>';
+      Object.entries(data.virtualCounts || {})
+        .sort(([a], [b]) => parseInt(a) - parseInt(b))
+        .forEach(([count, total]) => {
+          if (total > 0) {
+            virtualHTML += `<tr><td>Count ${count}</td><td>${total}</td></tr>`;
+          }
+        });
+      virtualTable.innerHTML = virtualHTML;
+    }
+
+    function updateLoadDistribution(platforms) {
+      const total = (platforms.zomato.total || 0) + (platforms.swiggy.total || 0);
+      const zomatoPercent = total ? Math.round((platforms.zomato.total / total) * 100) : 0;
+      const swiggyPercent = 100 - zomatoPercent;
+
+      document.getElementById('loadDistribution').innerHTML = `
+        <div class="platform-row">
+          <h4>Zomato (${zomatoPercent}%)</h4>
+          <div class="load-bar">
+            <div class="load-fill zomato" style="width: ${zomatoPercent}%">
+              ${platforms.zomato.total || 0} assignments
+            </div>
+          </div>
+        </div>
+        <div class="platform-row">
+          <h4>Swiggy (${swiggyPercent}%)</h4>
+          <div class="load-bar">
+            <div class="load-fill swiggy" style="width: ${swiggyPercent}%">
+              ${platforms.swiggy.total || 0} assignments
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Initial data load and refresh handling
+    google.script.run
+      .withSuccessHandler(updateDashboardUI)
+      .withFailureHandler(console.error)
+      .getDashboardData();
+
     function refreshData() {
       const refreshButton = document.querySelector('.refresh-button');
       refreshButton.disabled = true;
       refreshButton.innerHTML = '🔄 Refreshing...';
 
       google.script.run
-        .withSuccessHandler(function(newData) {
-          console.log("Data received:", newData); // Debugging log
-          if (!newData || !newData.agentDistribution) {
-            console.error("Agent data is missing or undefined.");
-          } else {
-            updateDashboardCounts(newData);
-          }
+        .withSuccessHandler(function(data) {
+          updateDashboardUI(data);
           refreshButton.disabled = false;
           refreshButton.innerHTML = '🔄 Refresh Data';
         })
@@ -374,72 +698,6 @@
           refreshButton.innerHTML = '🔄 Refresh Data';
         })
         .getDashboardData();
-    }
-
-    // Function to update dashboard counts dynamically
-    function updateDashboardCounts(data) {
-      // Update timestamp
-      document.getElementById('timestamp').innerText = new Date().toISOString();
-
-      // Update Zomato stats
-      document.querySelector('.platform-card.zomato .stats').innerHTML = `
-        Total: ${data.platforms.zomato.total || 0}<br>
-        Main: ${data.platforms.zomato.main || 0}<br>
-        Virtual: ${data.platforms.zomato.virtual || 0}
-      `;
-      const zomatoVirtualCounts = document.querySelector('.platform-card.zomato .virtual-counts');
-      zomatoVirtualCounts.innerHTML = 'Virtual Breakdown:<br>';
-      Object.entries(data.platforms.zomato.virtualCounts || {})
-        .sort(([a], [b]) => parseInt(a) - parseInt(b))
-        .forEach(([count, total]) => {
-          if (total > 0) {
-            zomatoVirtualCounts.innerHTML += `Count ${count}: ${total}<br>`;
-          }
-        });
-
-      // Update Swiggy stats
-      document.querySelector('.platform-card.swiggy .stats').innerHTML = `
-        Total: ${data.platforms.swiggy.total || 0}<br>
-        Main: ${data.platforms.swiggy.main || 0}<br>
-        Virtual: ${data.platforms.swiggy.virtual || 0}
-      `;
-      const swiggyVirtualCounts = document.querySelector('.platform-card.swiggy .virtual-counts');
-      swiggyVirtualCounts.innerHTML = 'Virtual Breakdown:<br>';
-      Object.entries(data.platforms.swiggy.virtualCounts || {})
-        .sort(([a], [b]) => parseInt(a) - parseInt(b))
-        .forEach(([count, total]) => {
-          if (total > 0) {
-            swiggyVirtualCounts.innerHTML += `Count ${count}: ${total}<br>`;
-          }
-        });
-
-      // Update agent table
-      const tbody = document.getElementById('agentTableBody');
-      tbody.innerHTML = '';
-      if (data.agentDistribution && data.agentDistribution.length > 0) {
-        data.agentDistribution.forEach(agent => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${agent.agent}</td>
-            <td>${agent.main}</td>
-            <td>${agent.virtual}</td>
-            <td>${agent.grandTotal}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      } else {
-        const row = document.createElement('tr');
-        row.innerHTML = '<td colspan="4">No agent data available</td>';
-        tbody.appendChild(row);
-      }
-    }
-
-    // Initial update
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
-
-    function updateDateTime() {
-      document.getElementById('timestamp').innerText = new Date().toISOString();
     }
   </script>
 </body>
