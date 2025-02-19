@@ -495,28 +495,47 @@ function setupBlankFillMode(results) {
 
 
     function onSuccess(result) {
-  hideLoading();
-  if (result && result.message) {
-    // Show success message if provided
-    const successDiv = document.createElement('div');
-    successDiv.style.cssText = `
-      background-color: #e6ffed;
-      border: 1px solid #34d058;
-      color: #165c26;
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-    `;
-    successDiv.textContent = result.message;
-    document.body.insertBefore(successDiv, document.querySelector('.platform-select'));
-    
-    setTimeout(() => {
-      google.script.host.close();
-    }, 2000);
-  } else {
-    google.script.host.close();
-  }
-}
+      hideLoading();
+      if (result && result.message) {
+        const successDiv = document.createElement('div');
+        successDiv.style.cssText = `
+          background-color: #e6ffed;
+          border: 1px solid #34d058;
+          color: #165c26;
+          padding: 16px;
+          border-radius: var(--border-radius);
+          margin: 16px;
+          text-align: center;
+          font-weight: bold;
+          font-size: 1.2rem;
+          opacity: 0;
+          transform: translateY(-20px);
+          transition: all 0.3s ease-out;
+          box-shadow: 0 2px 8px rgba(52, 208, 88, 0.15);
+        `;
+        successDiv.textContent = result.message.replace('data', 'Data');
+        document.body.insertBefore(successDiv, document.querySelector('.platform-select'));
+        
+        // Trigger animation
+        requestAnimationFrame(() => {
+          successDiv.style.opacity = '1';
+          successDiv.style.transform = 'translateY(0)';
+        });
+
+        setTimeout(() => {
+          // Fade out animation
+          successDiv.style.opacity = '0';
+          successDiv.style.transform = 'translateY(-20px)';
+          
+          // Close after animation
+          setTimeout(() => {
+            google.script.host.close();
+          }, 300);
+        }, 2000);
+      } else {
+        google.script.host.close();
+      }
+    }
 
    function onFailure(error) {
   hideLoading();

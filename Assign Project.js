@@ -808,21 +808,28 @@ function wrapErrorHandler(func) {
 
 // Modified onOpen function with wrapper functions
 function onOpen() {
-  logEvent('Menu Creation', 'Custom menu created');
+  logEvent('Menu Creation', 'Custom menu created with enhanced visuals');
   const ui = SpreadsheetApp.getUi();
-  ui.createMenu('🎯 Operations Dashboard')
-    .addSubMenu(ui.createMenu('🟠 Zomato')
-      .addItem('📊 Prepare Data', 'prepareZomatoData')
-      .addItem('🔄 Reapply Formulas', 'reapplyZomatoFormulas')
-      .addItem('🔍 Scan Blank Agents', 'scanZomatoBlankAgents')
-      .addItem('🗑️ Clear Assignments', 'clearZomatoAssignments'))
-    .addSubMenu(ui.createMenu('🟧 Swiggy')
-      .addItem('📊 Prepare Data', 'prepareSwiggyData')
-      .addItem('🔄 Reapply Formulas', 'reapplySwiggyFormulas')
-      .addItem('🔍 Scan Blank Agents', 'scanSwiggyBlankAgents')
-      .addItem('🗑️ Clear Assignments', 'clearSwiggyAssignments'))
+  ui.createMenu('🎯 Assignment Hub')
+    .addSubMenu(ui.createMenu('🏪 Zomato Manager')  // Changed from 🔴 to 🏪 for Zomato
+      .addItem('📥 Prepare Zomato Data', 'prepareZomatoData')
+      .addSeparator()
+      .addItem('⚡ Reapply Zomato Formulas', 'reapplyZomatoFormulas')
+      .addSeparator()
+      .addItem('🔍 Scan Zomato Blank Agents', 'scanZomatoBlankAgents')
+      .addSeparator()
+      .addItem('🗑️ Clear Zomato Assignments', 'clearZomatoAssignments'))
     .addSeparator()
-    .addItem('📈 Open Dashboard', 'showDashboard')
+    .addSubMenu(ui.createMenu('🛵 Swiggy Manager')  // Changed from 🟠 to 🛵 for Swiggy
+      .addItem('📥 Prepare Swiggy Data', 'prepareSwiggyData')
+      .addSeparator()
+      .addItem('⚡ Reapply Swiggy Formulas', 'reapplySwiggyFormulas')
+      .addSeparator()
+      .addItem('🔍 Scan Swiggy Blank Agents', 'scanSwiggyBlankAgents')
+      .addSeparator()
+      .addItem('🗑️ Clear Swiggy Assignments', 'clearSwiggyAssignments'))
+    .addSeparator()
+    .addItem('📊 Open Analytics Dashboard', 'showDashboard')
     .addToUi();
 }
 

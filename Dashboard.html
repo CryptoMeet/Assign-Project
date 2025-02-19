@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📊 Assignment Dashboard</title>
+  <title>Assignment Dashboard</title>
   <style>
     :root {
       --primary-color: #4361ee;
@@ -13,6 +13,10 @@
       --danger-color: #e71d36;
       --light-color: #f8f9fa;
       --dark-color: #212529;
+      --zomato-color: #cb202d;
+      --zomato-hover: #e63946;
+      --swiggy-color: #fc8019;
+      --swiggy-hover: #ff9b50;
     }
 
     body {
@@ -32,19 +36,38 @@
       border: none;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
     }
 
     .platform-card:hover {
       transform: translateY(-3px);
       box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
     }
 
     .platform-card.zomato {
       border-left: 5px solid #e23744;
+      background: linear-gradient(135deg, var(--zomato-color) 0%, #96151d 100%);
+      border-left: 5px solid var(--zomato-color);
     }
 
     .platform-card.swiggy {
       border-left: 5px solid #fc8019;
+      background: linear-gradient(135deg, var(--swiggy-color) 0%, #e67e22 100%);
+      border-left: 5px solid var(--swiggy-color);
+    }
+
+    .platform-card.zomato:hover {
+      background: linear-gradient(135deg, var(--zomato-hover) 0%, #ae1823 100%);
+    }
+
+    .platform-card.swiggy:hover {
+      background: linear-gradient(135deg, var(--swiggy-hover) 0%, #f39c12 100%);
     }
 
     .stats {
@@ -106,6 +129,12 @@
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
       overflow: hidden;
       margin-top: 1.5rem;
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     th {
@@ -113,6 +142,10 @@
       color: white;
       padding: 1rem;
       font-weight: 500;
+      background: #2c3e50;
+      color: white;
+      padding: 12px;
+      text-align: left;
     }
 
     td {
@@ -126,6 +159,15 @@
 
     tr:hover td {
       background: #f8f9ff;
+      background-color: #e9ecef;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    tr:nth-child(odd) {
+      background-color: #ffffff;
     }
 
     .filter-container {
@@ -148,10 +190,74 @@
     select:focus {
       border-color: var(--primary-color);
     }
+
+    .action-button {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: none;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 5px;
+      font-weight: bold;
+    }
+
+    .action-button.zomato {
+      background-color: var(--zomato-color);
+    }
+
+    .action-button.swiggy {
+      background-color: var(--swiggy-color);
+    }
+
+    .action-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .platform-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .platform-indicator.zomato {
+      background-color: var(--zomato-color);
+    }
+
+    .platform-indicator.swiggy {
+      background-color: var(--swiggy-color);
+    }
+
+    .platform-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .platform-logo {
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .platform-header h3 {
+      margin: 0;
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    .platform-logo.swiggy {
+      background: white;
+      padding: 4px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
-  <h1>📊 Assignment Dashboard</h1>
+  <h1>Assignment Dashboard</h1>
   <p>User: <?= data.currentUser || 'Unknown User' ?></p>
   <p>Loading...</p>
   <p id="timestamp">2025-01-28 13:14:13</p>
@@ -162,7 +268,9 @@
 
   <!-- Zomato Card -->
   <div class="platform-card zomato">
-    <h3>🟠 ZOMATO</h3>
+    <div class="platform-header">
+      <img src="https://b.zmtcdn.com/web_assets/b40b97e677bc7b2ca77c58c61db266fe1603954218.png" alt="Zomato Logo" class="platform-logo">
+    </div>
     <div class="stats">
       Total: <?= data.platforms.zomato.total || 0 ?><br>
       Main: <?= data.platforms.zomato.main || 0 ?><br>
@@ -181,7 +289,10 @@
 
   <!-- Swiggy Card -->
   <div class="platform-card swiggy">
-    <h3>🟧 SWIGGY</h3>
+    <div class="platform-header">
+      <img src="https://logos-world.net/wp-content/uploads/2020/11/Swiggy-Logo.png" alt="Swiggy Logo" class="platform-logo swiggy">
+      <h3>SWIGGY</h3>
+    </div>
     <div class="stats">
       Total: <?= data.platforms.swiggy.total || 0 ?><br>
       Main: <?= data.platforms.swiggy.main || 0 ?><br>
@@ -212,7 +323,7 @@
     </select>
   </div>
 
-  <table>
+  <table id="agentTable">
     <thead>
       <tr>
         <th>Agent Name</th>
